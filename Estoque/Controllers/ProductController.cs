@@ -15,55 +15,63 @@ namespace Estoque.Controllers
         private static int id = 1;
 
         [HttpPost]
-        public List<Product> CreateProduct([FromBody] Product product)
+        public IActionResult CreateProduct([FromBody] Product product)
         {
             product.Id = id++;
             products.Add(product);
-            return products;
+            return CreatedAtAction(nameof(GetProductById), new { id = product.Id}, product);
         }
 
 
         [HttpGet]
-        public List<Product> GetAllProducts()
+        public IActionResult GetAllProducts()
         {
-            return products;
+            return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public Product GetProductById([FromRoute] int id)
+        public IActionResult GetProductById([FromRoute] int id)
         {
-            return products.FirstOrDefault(product => product.Id == id);
+            Product product = products.FirstOrDefault(product => product.Id == id);
+            if(product != null)
+            {
+                return Ok(product);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpPut("{id}")]
-        public Product UpdateProduct([FromBody] Product productUpdated, int id)
+        public IActionResult UpdateProduct([FromBody] Product productUpdated, int id)
         {
-            Product product = this.GetProductById(id);
+            Product product = products.FirstOrDefault(product => product.Id == id);
             if(product != null)
             {
                 product.Description = productUpdated.Description;
                 product.Name = productUpdated.Name;
                 product.Price = productUpdated.Price;
                 product.Quantity = productUpdated.Quantity;
-                return product;
+                return NoContent();
             }
             else
             {
-                return null;
+                return NotFound();
             }
         }
 
         [HttpDelete("{id}")]
-        public Boolean DeleteProductById([FromRoute]int id)
+        public IActionResult DeleteProductById([FromRoute]int id)
         {
-            Product product = this.GetProductById(id);
+            Product product = products.FirstOrDefault(product => product.Id == id);
             if(product != null)
             {
                 products.Remove(product);
-                return true;
+                return NoContent();
             }
 
-            return false;
+            return NotFound();
         }
     }
 }
